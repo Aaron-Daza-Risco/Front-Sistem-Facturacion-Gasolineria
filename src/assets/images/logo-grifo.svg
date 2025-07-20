@@ -1,0 +1,10 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="100" cy="100" r="95" fill="#F2F2F2" stroke="#0F4C81" stroke-width="5"/>
+  <path d="M95 40C95 37.2386 97.2386 35 100 35C102.761 35 105 37.2386 105 40V150C105 152.761 102.761 155 100 155C97.2386 155 95 152.761 95 150V40Z" fill="#0F4C81"/>
+  <path d="M80 50C80 47.2386 82.2386 45 85 45C87.7614 45 90 47.2386 90 50V150C90 152.761 87.7614 155 85 155C82.2386 155 80 152.761 80 150V50Z" fill="#F27F0C"/>
+  <path d="M110 50C110 47.2386 112.239 45 115 45C117.761 45 120 47.2386 120 50V150C120 152.761 117.761 155 115 155C112.239 155 110 152.761 110 150V50Z" fill="#F27F0C"/>
+  <path d="M65 75H135V130C135 143.807 123.807 155 110 155H90C76.1929 155 65 143.807 65 130V75Z" fill="#0F4C81" fill-opacity="0.2"/>
+  <path d="M70 65L130 65L125 75L75 75L70 65Z" fill="#0F4C81"/>
+  <path d="M60 65L140 65L135 55L65 55L60 65Z" fill="#F27F0C"/>
+  <text x="100" y="175" font-family="Arial" font-size="16" font-weight="bold" text-anchor="middle" fill="#0F4C81">GRIFO SAN JUAN S.A.C.</text>
+</svg>

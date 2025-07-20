@@ -1,0 +1,71 @@
+/* Estilos específicos para impresión */
+@media print {
+  /* Ocultar elementos innecesarios para impresión */
+  body * {
+    visibility: hidden;
+  }
+  
+  /* Solo mostrar el contenido del comprobante */
+  .comprobante-print-section,
+  .comprobante-print-section * {
+    visibility: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  
+  /* Colocar el comprobante en la esquina superior izquierda */
+  .comprobante-print-section {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    background-color: white !important;
+  }
+  
+  /* Ocultar botones de acción */
+  .comprobante-acciones {
+    display: none;
+  }
+  
+  /* Ajustar tamaño y márgenes para impresión */
+  .comprobante-pagina {
+    padding: 0.5cm;
+    margin: 0;
+    box-shadow: none;
+    max-width: 21cm;
+    min-height: auto;
+  }
+  
+  /* Asegurar que todo el contenido se vea bien en la impresión */
+  table, tr, td, th {
+    page-break-inside: avoid;
+    border-color: black !important;
+  }
+  
+  /* Aplicar algunos estilos básicos de impresión */
+  html, body {
+    width: 210mm;
+    height: 297mm;
+  }
+
+  /* Ocultar específicamente los botones */
+  .no-print {
+    display: none !important;
+  }
+
+  /* Asegurar que los textos sean legibles */
+  p, span, h1, h2, h3, h4, h5, h6, th, td {
+    color: black !important;
+  }
+
+  /* Asegurar que los bordes y fondos sean visibles */
+  .border, .border-b, .border-t, .border-l, .border-r {
+    border-color: black !important;
+  }
+
+  .bg-gray-100, .bg-gray-50 {
+    background-color: #f3f4f6 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

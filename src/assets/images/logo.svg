@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 80">
+  <rect width="200" height="80" fill="#f8f8f8" rx="10" />
+  <path d="M50,20 L60,20 L60,60 L50,60 Z" fill="#2563eb"/>
+  <path d="M75,30 C75,22 85,20 90,20 C95,20 105,22 105,30 L105,60 L95,60 L95,35 C95,33 93,30 90,30 C87,30 85,33 85,35 L85,60 L75,60 Z" fill="#2563eb"/>
+  <path d="M115,20 L125,20 L125,40 L140,20 L153,20 L133,45 L153,60 L140,60 L125,45 L125,60 L115,60 Z" fill="#2563eb"/>
+  <circle cx="45" cy="40" r="20" fill="#ef4444" />
+  <circle cx="45" cy="40" r="15" fill="#ffffff" />
+  <circle cx="45" cy="40" r="10" fill="#ef4444" />
+  <path d="M30,40 L60,40" stroke="#ffffff" stroke-width="3" />
+  <text x="100" y="75" font-family="Arial" font-size="10" text-anchor="middle" fill="#334155">ESTACIÓN DE SERVICIOS</text>
+</svg>
