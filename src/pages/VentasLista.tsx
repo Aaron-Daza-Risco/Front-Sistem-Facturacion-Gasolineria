@@ -34,7 +34,7 @@ const VentasLista: React.FC = () => {
   useEffect(() => {
     fetchVentas();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filtroFecha, filtroCombustible, page]);
+  }, [filtroFecha, filtroCombustible, page, filtroCliente]);
   
   // Cargar lista de combustibles (para el filtro)
   useEffect(() => {

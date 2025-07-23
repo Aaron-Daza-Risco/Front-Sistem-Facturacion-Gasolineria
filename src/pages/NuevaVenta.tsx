@@ -10,6 +10,7 @@ import { obtenerFechaActualPeru, fechaAFormatoISO } from '../utils/fechaUtils';
 
 const NuevaVenta: React.FC = () => {
   const [clienteDNI, setClienteDNI] = useState('');
+  const [dniError, setDniError] = useState('');
   const [placaVehiculo, setPlacaVehiculo] = useState('');
   const [cantidad, setCantidad] = useState('');
   const [montoIngresado, setMontoIngresado] = useState('');
@@ -595,12 +596,27 @@ const NuevaVenta: React.FC = () => {
                       <input
                         type="text"
                         value={clienteDNI}
-                        onChange={(e) => setClienteDNI(e.target.value)}
-                        className="flex-1 bg-[#F8F8F8] border border-gray-200 rounded-l-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#E39E36] focus:border-[#E39E36]"
+                        onChange={(e) => {
+                          // Solo permitir números
+                          const value = e.target.value.replace(/[^\d]/g, '');
+                          setClienteDNI(value);
+                          // Validar en tiempo real
+                          if (!/^\d{8}$/.test(value)) {
+                            setDniError('El DNI debe tener 8 números');
+                          } else {
+                            setDniError('');
+                          }
+                        }}
+                        className={`flex-1 bg-[#F8F8F8] border ${dniError ? 'border-[#BA2E3B]' : 'border-gray-200'} rounded-l-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#E39E36] focus:border-[#E39E36]`}
                         maxLength={8}
                         placeholder="Ingrese DNI"
                         disabled={loading}
+                        inputMode="numeric"
+                        pattern="\d*"
                       />
+                      {dniError && (
+                        <div className="w-full text-xs text-[#BA2E3B] mt-1">{dniError}</div>
+                      )}
                       <button
                         type="button"
                         onClick={buscarCliente}
