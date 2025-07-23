@@ -5,6 +5,7 @@ import type { Combustible, CombustibleCreate } from '../api/combustibleApi';
 import { toast } from 'react-hot-toast';
 
 const Combustibles: React.FC = () => {
+  const [busqueda, setBusqueda] = useState<string>("");
   const [combustibles, setCombustibles] = useState<Combustible[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -43,6 +44,40 @@ const Combustibles: React.FC = () => {
   };
 
   // Funciones para manejar combustibles
+
+  const handleDeleteCombustible = async (id: number) => {
+    if (!window.confirm('¿Deseas eliminar este combustible? Esta acción no se puede deshacer y el registro será removido permanentemente.')) {
+      toast('Eliminación cancelada por el usuario.', {
+        icon: '⚠️',
+        style: { background: '#fffbe6', color: '#BA2E3B', fontWeight: 'bold' }
+      });
+      return;
+    }
+    try {
+      await combustibleApi.delete(id);
+      toast.success('Combustible eliminado con éxito', {
+        icon: '✅',
+        style: { background: '#fff', color: '#011748', fontWeight: 'bold' }
+      });
+      loadCombustibles();
+    } catch (error: unknown) {
+      console.error('Error al eliminar combustible:', error);
+      let mensaje = 'Error al eliminar el combustible';
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'message' in error &&
+        typeof (error as { message?: string }).message === 'string' &&
+        (error as { message: string }).message.includes('Error:')
+      ) {
+        mensaje = 'No se pudo eliminar el combustible. Intenta nuevamente.';
+      }
+      toast.error(mensaje, {
+        icon: '❌',
+        style: { background: '#fff', color: '#BA2E3B', fontWeight: 'bold' }
+      });
+    }
+  };
   const handleEditPrecio = (id: number) => {
     setEditingId(id);
     const combustible = combustibles.find(c => c.id_combustible === id);
@@ -53,18 +88,27 @@ const Combustibles: React.FC = () => {
 
   const savePrecioUpdate = async (id: number) => {
     if (!newPrecio || isNaN(Number(newPrecio))) {
-      toast.error("Por favor ingrese un precio válido");
+      toast('Por favor ingrese un precio válido', {
+        icon: '⚠️',
+        style: { background: '#fffbe6', color: '#BA2E3B', fontWeight: 'bold' }
+      });
       return;
     }
 
     try {
       await combustibleApi.updatePrecio(id, Number(newPrecio));
-      toast.success("Precio actualizado con éxito");
+      toast.success("Precio actualizado con éxito", {
+        icon: '✅',
+        style: { background: '#fff', color: '#011748', fontWeight: 'bold' }
+      });
       setEditingId(null);
       loadCombustibles();
     } catch (error) {
       console.error("Error al actualizar precio:", error);
-      toast.error("Error al actualizar el precio");
+      toast.error("Error al actualizar el precio", {
+        icon: '❌',
+        style: { background: '#fff', color: '#BA2E3B', fontWeight: 'bold' }
+      });
     }
   };
 
@@ -80,7 +124,10 @@ const Combustibles: React.FC = () => {
 
   const saveIngresoUpdate = async (id: number) => {
     if (!cantidadIngreso || isNaN(Number(cantidadIngreso)) || Number(cantidadIngreso) <= 0) {
-      toast.error("Por favor ingrese una cantidad válida");
+      toast('Por favor ingrese una cantidad válida', {
+        icon: '⚠️',
+        style: { background: '#fffbe6', color: '#BA2E3B', fontWeight: 'bold' }
+      });
       return;
     }
 
@@ -89,14 +136,20 @@ const Combustibles: React.FC = () => {
       if (combustible) {
         const nuevaCantidad = Number(combustible.cantidad) + Number(cantidadIngreso);
         await combustibleApi.updateCantidad(id, nuevaCantidad);
-        toast.success("Ingreso de combustible registrado con éxito");
+        toast.success("Ingreso de combustible registrado con éxito", {
+          icon: '✅',
+          style: { background: '#fff', color: '#011748', fontWeight: 'bold' }
+        });
         setRegistrandoIngreso(null);
         setCantidadIngreso("");
         loadCombustibles();
       }
     } catch (error) {
       console.error("Error al registrar ingreso:", error);
-      toast.error("Error al registrar el ingreso de combustible");
+      toast.error("Error al registrar el ingreso de combustible", {
+        icon: '❌',
+        style: { background: '#fff', color: '#BA2E3B', fontWeight: 'bold' }
+      });
     }
   };
 
@@ -111,18 +164,27 @@ const Combustibles: React.FC = () => {
 
   const handleCreateCombustible = async () => {
     if (!newCombustible.nombre || newCombustible.precio <= 0 || newCombustible.cantidad < 0) {
-      toast.error("Por favor complete correctamente todos los campos");
+      toast('Por favor complete correctamente todos los campos', {
+        icon: '⚠️',
+        style: { background: '#fffbe6', color: '#BA2E3B', fontWeight: 'bold' }
+      });
       return;
     }
 
     try {
       await combustibleApi.create(newCombustible);
-      toast.success("Combustible creado con éxito");
+      toast.success("Combustible creado con éxito", {
+        icon: '✅',
+        style: { background: '#fff', color: '#011748', fontWeight: 'bold' }
+      });
       toggleNewCombustibleModal();
       loadCombustibles();
     } catch (error) {
       console.error("Error al crear combustible:", error);
-      toast.error("Error al crear el combustible");
+      toast.error("Error al crear el combustible", {
+        icon: '❌',
+        style: { background: '#fff', color: '#BA2E3B', fontWeight: 'bold' }
+      });
     }
   };
 
@@ -140,6 +202,17 @@ const Combustibles: React.FC = () => {
           <FaGasPump />
           <span>Nuevo Combustible</span>
         </button>
+      </div>
+      <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="flex-1">
+          <input
+            type="text"
+            className="w-full p-2 border rounded-md text-[#011748]"
+            placeholder="Buscar combustible por nombre..."
+            value={busqueda}
+            onChange={e => setBusqueda(e.target.value)}
+          />
+        </div>
       </div>
 
       {loading ? (
@@ -160,7 +233,9 @@ const Combustibles: React.FC = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-6">
-          {combustibles.map((combustible) => (
+          {combustibles
+            .filter(c => c.nombre.toLowerCase().includes(busqueda.toLowerCase()))
+            .map((combustible) => (
             <div key={combustible.id_combustible} className="bg-white rounded-lg shadow-md overflow-hidden border-t-4 border-[#E39E36]">
               <div className="p-6">
                 <h3 className="text-xl font-bold text-[#011748] mb-2">{combustible.nombre}</h3>
@@ -189,15 +264,22 @@ const Combustibles: React.FC = () => {
                   </div>
                 ) : (
                   <div className="flex justify-between items-center mb-4">
-                    <span className="text-2xl font-bold text-[#BA2E3B]">S/ {Number(combustible.precio).toFixed(2)}</span>
-                    <div className="flex space-x-2">
-                      <button 
-                        onClick={() => handleEditPrecio(combustible.id_combustible)}
-                        className="text-[#011748] hover:text-[#011748]/80 bg-[#011748]/10 p-2 rounded-full"
-                      >
-                        <FaEdit size={18} />
-                      </button>
-                    </div>
+                  <span className="text-2xl font-bold text-[#BA2E3B]">S/ {Number(combustible.precio).toFixed(2)}</span>
+                  <div className="flex space-x-2">
+                    <button 
+                      onClick={() => handleEditPrecio(combustible.id_combustible)}
+                      className="text-[#011748] hover:text-[#011748]/80 bg-[#011748]/10 p-2 rounded-full"
+                    >
+                      <FaEdit size={18} />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteCombustible(combustible.id_combustible)}
+                      className="text-red-500 hover:text-red-700 bg-red-100 p-2 rounded-full"
+                      title="Eliminar combustible"
+                    >
+                      <FaTimes size={18} />
+                    </button>
+                  </div>
                   </div>
                 )}
                 

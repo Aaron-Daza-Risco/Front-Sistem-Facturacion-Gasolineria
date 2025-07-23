@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { FaEdit, FaTrash, FaSearch, FaUserPlus, FaSave, FaTimes, FaSpinner } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaSearch, FaUserPlus, FaSave, FaTimes, FaSpinner, FaCheckCircle, FaExclamationTriangle, FaTimesCircle } from 'react-icons/fa';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import type { Cliente } from '../types/venta';
 import * as clienteApi from '../api/clienteApi';
 
@@ -20,12 +22,21 @@ const ClienteModal: React.FC<ClienteModalProps> = ({ cliente, isOpen, onClose, o
     celular: '',
     direccion: ''
   });
+  const [errors, setErrors] = useState({
+    dni: '',
+    nombre: '',
+    apellido_paterno: '',
+    apellido_materno: '',
+    celular: '',
+    direccion: ''
+  });
 
   useEffect(() => {
     if (cliente) {
       setFormData({
         ...cliente
       });
+      setErrors({ dni: '', nombre: '', apellido_paterno: '', apellido_materno: '', celular: '', direccion: '' });
     } else {
       setFormData({
         dni: '',
@@ -35,16 +46,71 @@ const ClienteModal: React.FC<ClienteModalProps> = ({ cliente, isOpen, onClose, o
         celular: '',
         direccion: ''
       });
+      setErrors({ dni: '', nombre: '', apellido_paterno: '', apellido_materno: '', celular: '', direccion: '' });
     }
   }, [cliente]);
 
+  // Validaciones en tiempo real
+  const validateField = (name: string, value: string) => {
+    switch (name) {
+      case 'dni':
+        if (!/^\d{8}$/.test(value)) return 'El DNI debe tener 8 números';
+        return '';
+      case 'nombre':
+        if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(value.trim())) return 'Solo letras y espacios';
+        return '';
+      case 'apellido_paterno':
+        if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(value.trim())) return 'Solo letras y espacios';
+        return '';
+      case 'apellido_materno':
+        if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(value.trim())) return 'Solo letras y espacios';
+        return '';
+      case 'celular':
+        if (value && !/^\d{9}$/.test(value)) return 'Debe tener 9 números';
+        return '';
+      case 'direccion':
+        if (value && value.trim().length < 3) return 'Mínimo 3 caracteres';
+        return '';
+      default:
+        return '';
+    }
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    // Validar en tiempo real
+    setErrors(prev => ({ ...prev, [name]: validateField(name, value) }));
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  // Restringir ingreso de caracteres no válidos
+  const handleInput = (e: React.FormEvent<HTMLInputElement>) => {
+    const { name, value } = e.currentTarget;
+    let newValue = value;
+    if (name === 'dni' || name === 'celular') {
+      newValue = newValue.replace(/[^\d]/g, '');
+    } else if (name === 'nombre' || name === 'apellido_paterno' || name === 'apellido_materno') {
+      newValue = newValue.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+    }
+    if (newValue !== value) {
+      e.currentTarget.value = newValue;
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Validar todos los campos antes de enviar
+    const newErrors = {
+      dni: validateField('dni', formData.dni),
+      nombre: validateField('nombre', formData.nombre),
+      apellido_paterno: validateField('apellido_paterno', formData.apellido_paterno),
+      apellido_materno: validateField('apellido_materno', formData.apellido_materno),
+      celular: validateField('celular', formData.celular || ''),
+      direccion: validateField('direccion', formData.direccion || '')
+    };
+    setErrors(newErrors);
+    // Si hay algún error, no enviar
+    if (Object.values(newErrors).some(msg => msg)) return;
     onSave(formData);
   };
 
@@ -70,10 +136,14 @@ const ClienteModal: React.FC<ClienteModalProps> = ({ cliente, isOpen, onClose, o
               name="dni"
               value={formData.dni}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#011748]"
+              onInput={handleInput}
+              className={`w-full border ${errors.dni ? 'border-[#BA2E3B]' : 'border-gray-300'} rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#011748]`}
               required
               maxLength={8}
+              inputMode="numeric"
+              pattern="\d*"
             />
+            {errors.dni && <p className="text-xs text-[#BA2E3B] mt-1">{errors.dni}</p>}
           </div>
           
           <div className="mb-4">
@@ -83,9 +153,11 @@ const ClienteModal: React.FC<ClienteModalProps> = ({ cliente, isOpen, onClose, o
               name="nombre"
               value={formData.nombre}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#011748]"
+              onInput={handleInput}
+              className={`w-full border ${errors.nombre ? 'border-[#BA2E3B]' : 'border-gray-300'} rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#011748]`}
               required
             />
+            {errors.nombre && <p className="text-xs text-[#BA2E3B] mt-1">{errors.nombre}</p>}
           </div>
           
           <div className="mb-4">
@@ -95,9 +167,11 @@ const ClienteModal: React.FC<ClienteModalProps> = ({ cliente, isOpen, onClose, o
               name="apellido_paterno"
               value={formData.apellido_paterno}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#011748]"
+              onInput={handleInput}
+              className={`w-full border ${errors.apellido_paterno ? 'border-[#BA2E3B]' : 'border-gray-300'} rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#011748]`}
               required
             />
+            {errors.apellido_paterno && <p className="text-xs text-[#BA2E3B] mt-1">{errors.apellido_paterno}</p>}
           </div>
           
           <div className="mb-4">
@@ -107,9 +181,11 @@ const ClienteModal: React.FC<ClienteModalProps> = ({ cliente, isOpen, onClose, o
               name="apellido_materno"
               value={formData.apellido_materno}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#011748]"
+              onInput={handleInput}
+              className={`w-full border ${errors.apellido_materno ? 'border-[#BA2E3B]' : 'border-gray-300'} rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#011748]`}
               required
             />
+            {errors.apellido_materno && <p className="text-xs text-[#BA2E3B] mt-1">{errors.apellido_materno}</p>}
           </div>
           
           <div className="mb-4">
@@ -119,8 +195,13 @@ const ClienteModal: React.FC<ClienteModalProps> = ({ cliente, isOpen, onClose, o
               name="celular"
               value={formData.celular || ''}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#011748]"
+              onInput={handleInput}
+              className={`w-full border ${errors.celular ? 'border-[#BA2E3B]' : 'border-gray-300'} rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#011748]`}
+              inputMode="numeric"
+              pattern="\d*"
+              maxLength={9}
             />
+            {errors.celular && <p className="text-xs text-[#BA2E3B] mt-1">{errors.celular}</p>}
           </div>
           
           <div className="mb-6">
@@ -130,8 +211,9 @@ const ClienteModal: React.FC<ClienteModalProps> = ({ cliente, isOpen, onClose, o
               name="direccion"
               value={formData.direccion || ''}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#011748]"
+              className={`w-full border ${errors.direccion ? 'border-[#BA2E3B]' : 'border-gray-300'} rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#011748]`}
             />
+            {errors.direccion && <p className="text-xs text-[#BA2E3B] mt-1">{errors.direccion}</p>}
           </div>
           
           <div className="flex justify-end gap-3">
@@ -167,7 +249,6 @@ const ClienteModal: React.FC<ClienteModalProps> = ({ cliente, isOpen, onClose, o
 const Clientes: React.FC = () => {
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentCliente, setCurrentCliente] = useState<Cliente | null>(null);
@@ -176,7 +257,6 @@ const Clientes: React.FC = () => {
   useEffect(() => {
     const fetchClientes = async () => {
       setLoading(true);
-      setError(null);
       try {
         const response = await clienteApi.getClientes();
         if (response.error) {
@@ -186,15 +266,15 @@ const Clientes: React.FC = () => {
           setClientes(response.data);
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Error desconocido al cargar clientes');
         console.error('Error al cargar clientes:', err);
-      } finally {
         setLoading(false);
       }
     };
 
     fetchClientes();
   }, []);
+
+  // const [error, setError] = useState<string | null>(null); // Removed unused error state
 
   const handleOpenModal = (cliente: Cliente | null = null) => {
     setCurrentCliente(cliente);
@@ -213,24 +293,43 @@ const Clientes: React.FC = () => {
         // Actualizar cliente existente
         const response = await clienteApi.updateCliente(clienteData.id_cliente, clienteData);
         if (response.error) {
+          toast.error(`Error al actualizar cliente: ${response.error}`, {
+            position: 'top-right',
+            icon: <FaTimesCircle className="text-[#BA2E3B] mr-2" />
+          });
           throw new Error(response.error);
         }
         if (response.data) {
           setClientes(prev => prev.map(c => c.id_cliente === clienteData.id_cliente ? response.data as Cliente : c));
+          toast.success('Cliente actualizado con éxito', {
+            position: 'top-right',
+            icon: <FaCheckCircle className="text-[#2ECC40] mr-2" />
+          });
         }
       } else {
         // Crear nuevo cliente
         const response = await clienteApi.createCliente(clienteData);
         if (response.error) {
+          toast.error(`Error al crear cliente: ${response.error}`, {
+            position: 'top-right',
+            icon: <FaTimesCircle className="text-[#BA2E3B] mr-2" />
+          });
           throw new Error(response.error);
         }
         if (response.data) {
           setClientes(prev => [...prev, response.data as Cliente]);
+          toast.success('Cliente creado con éxito', {
+            position: 'top-right',
+            icon: <FaCheckCircle className="text-[#2ECC40] mr-2" />
+          });
         }
       }
       handleCloseModal();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al guardar cliente');
+      toast.error(err instanceof Error ? err.message : 'Error al guardar cliente', {
+        position: 'top-right',
+        icon: <FaTimesCircle className="text-[#BA2E3B] mr-2" />
+      });
       console.error('Error al guardar cliente:', err);
     } finally {
       setIsSubmitting(false);
@@ -239,18 +338,32 @@ const Clientes: React.FC = () => {
 
   const handleDeleteCliente = async (id_cliente: number) => {
     if (!window.confirm('¿Está seguro de que desea eliminar este cliente?')) {
+      toast.info('Eliminación cancelada', {
+        position: 'top-right',
+        icon: <FaExclamationTriangle className="text-[#E39E36] mr-2" />
+      });
       return;
     }
-    
     setLoading(true);
     try {
       const response = await clienteApi.deleteCliente(id_cliente);
       if (response.error) {
+      toast.error(`Error al eliminar cliente: ${response.error}`, {
+        position: 'top-right',
+        icon: <FaTimesCircle className="text-[#BA2E3B] mr-2" />
+      });
         throw new Error(response.error);
       }
       setClientes(prev => prev.filter(c => c.id_cliente !== id_cliente));
+      toast.success('Cliente eliminado con éxito', {
+        position: 'top-right',
+        icon: <FaCheckCircle className="text-[#2ECC40] mr-2" />
+      });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al eliminar cliente');
+      toast.error(err instanceof Error ? err.message : 'Error al eliminar cliente', {
+        position: 'top-right',
+        icon: <FaTimesCircle className="text-[#BA2E3B] mr-2" />
+      });
       console.error('Error al eliminar cliente:', err);
     } finally {
       setLoading(false);
@@ -280,12 +393,9 @@ const Clientes: React.FC = () => {
         </button>
       </div>
 
-      {error && (
-        <div className="mb-4 p-4 bg-[#BA2E3B]/10 border-l-4 border-[#BA2E3B] text-[#BA2E3B] rounded">
-          {error}
-        </div>
-      )}
+      {/* Las notificaciones ahora se muestran con Toastify */}
 
+      <ToastContainer />
       <div className="bg-white rounded-lg shadow-md overflow-hidden border-t-4 border-[#E39E36]">
         <div className="p-4 bg-[#F8F8F8]">
           <div className="flex">
@@ -379,5 +489,5 @@ const Clientes: React.FC = () => {
     </div>
   );
 };
-
 export default Clientes;
+
