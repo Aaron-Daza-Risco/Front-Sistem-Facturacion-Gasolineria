@@ -322,14 +322,7 @@ const VentasLista: React.FC = () => {
           <h1 className="text-3xl font-bold text-[#011748]">Historial de Ventas</h1>
           <p className="text-gray-600 text-sm">Consulta y gestiona las ventas realizadas</p>
         </div>
-        <div className="flex space-x-3">
-          <button className="flex items-center px-4 py-2.5 bg-[#011748] text-white rounded-lg hover:bg-[#011748]/90 transition duration-200 shadow-sm">
-            <FaFileExcel className="mr-2" /> Exportar Excel
-          </button>
-          <button className="flex items-center px-4 py-2.5 bg-[#BA2E3B] text-white rounded-lg hover:bg-[#BA2E3B]/90 transition duration-200 shadow-sm">
-            <FaFilePdf className="mr-2" /> Exportar PDF
-          </button>
-        </div>
+        {/* Botones de exportar eliminados */}
       </div>
       
       <div className="bg-white rounded-xl shadow-md p-6 mb-6 border-t-4 border-[#E39E36]">

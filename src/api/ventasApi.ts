@@ -1,7 +1,7 @@
 import type { Cliente, Combustible, Venta, DetalleVenta, CombustibleCalculo } from '../types/venta';
 
 // Configuración base para las peticiones API
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = 'http://127.0.0.1:8000/api';
 
 // Interfaces para las respuestas
 export interface ApiResponse<T> {

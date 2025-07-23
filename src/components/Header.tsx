@@ -47,30 +47,6 @@ const Header = ({ userName }: HeaderProps) => {
               <div className="py-1">
                 <Menu.Item>
                   {({ active }) => (
-                    <a
-                      href="#"
-                      className={`${
-                        active ? 'bg-[#F8F8F8]' : ''
-                      } block px-4 py-2 text-sm text-[#011748] flex items-center`}
-                    >
-                      <FaUser className="mr-2 text-[#E39E36]" /> Mi Perfil
-                    </a>
-                  )}
-                </Menu.Item>
-                <Menu.Item>
-                  {({ active }) => (
-                    <a
-                      href="#"
-                      className={`${
-                        active ? 'bg-[#F8F8F8]' : ''
-                      } block px-4 py-2 text-sm text-[#011748] flex items-center`}
-                    >
-                      <FaCog className="mr-2 text-[#E39E36]" /> Configuración
-                    </a>
-                  )}
-                </Menu.Item>
-                <Menu.Item>
-                  {({ active }) => (
                     <button
                       onClick={handleLogout}
                       className={`${

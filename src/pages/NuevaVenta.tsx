@@ -474,7 +474,7 @@ const NuevaVenta: React.FC = () => {
           console.log("Datos de factura con orden estricto:", JSON.stringify(ventaFactura, null, 2));
           
           // Envío directo para facturas
-          const facturaResponse = await fetch(`http://localhost:8000/api/ventas/`, {
+          const facturaResponse = await fetch(`http://127.0.0.1:8000/api/ventas/`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
