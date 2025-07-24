@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { FaEdit, FaTrash, FaSearch, FaUserPlus, FaSave, FaTimes, FaSpinner, FaCheckCircle, FaExclamationTriangle, FaTimesCircle } from 'react-icons/fa';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { FaEdit, FaTrash, FaSearch, FaUserPlus, FaSave, FaTimes, FaSpinner } from 'react-icons/fa';
+import { toast } from 'react-hot-toast';
 import type { Cliente } from '../types/venta';
 import * as clienteApi from '../api/clienteApi';
 
@@ -14,14 +13,15 @@ interface ClienteModalProps {
 }
 
 const ClienteModal: React.FC<ClienteModalProps> = ({ cliente, isOpen, onClose, onSave, isLoading }) => {
-  const [formData, setFormData] = useState<Cliente>({
+  const initialForm = {
     dni: '',
     nombre: '',
     apellido_paterno: '',
     apellido_materno: '',
     celular: '',
     direccion: ''
-  });
+  };
+  const [formData, setFormData] = useState<Cliente>(initialForm);
   const [errors, setErrors] = useState({
     dni: '',
     nombre: '',
@@ -33,22 +33,13 @@ const ClienteModal: React.FC<ClienteModalProps> = ({ cliente, isOpen, onClose, o
 
   useEffect(() => {
     if (cliente) {
-      setFormData({
-        ...cliente
-      });
+      setFormData({ ...cliente });
       setErrors({ dni: '', nombre: '', apellido_paterno: '', apellido_materno: '', celular: '', direccion: '' });
     } else {
-      setFormData({
-        dni: '',
-        nombre: '',
-        apellido_paterno: '',
-        apellido_materno: '',
-        celular: '',
-        direccion: ''
-      });
+      setFormData(initialForm);
       setErrors({ dni: '', nombre: '', apellido_paterno: '', apellido_materno: '', celular: '', direccion: '' });
     }
-  }, [cliente]);
+  }, [cliente, isOpen]);
 
   // Validaciones en tiempo real
   const validateField = (name: string, value: string) => {
@@ -294,42 +285,54 @@ const Clientes: React.FC = () => {
         const response = await clienteApi.updateCliente(clienteData.id_cliente, clienteData);
         if (response.error) {
           toast.error(`Error al actualizar cliente: ${response.error}`, {
-            position: 'top-right',
-            icon: <FaTimesCircle className="text-[#BA2E3B] mr-2" />
+            icon: '❌',
+            style: { background: '#fff', color: '#BA2E3B', fontWeight: 'bold' },
+            position: 'top-center'
           });
           throw new Error(response.error);
         }
         if (response.data) {
           setClientes(prev => prev.map(c => c.id_cliente === clienteData.id_cliente ? response.data as Cliente : c));
           toast.success('Cliente actualizado con éxito', {
-            position: 'top-right',
-            icon: <FaCheckCircle className="text-[#2ECC40] mr-2" />
+            icon: '✅',
+            style: { background: '#fff', color: '#011748', fontWeight: 'bold' },
+            position: 'top-center'
           });
         }
+        handleCloseModal();
       } else {
         // Crear nuevo cliente
         const response = await clienteApi.createCliente(clienteData);
         if (response.error) {
-          toast.error(`Error al crear cliente: ${response.error}`, {
-            position: 'top-right',
-            icon: <FaTimesCircle className="text-[#BA2E3B] mr-2" />
-          });
+          // No mostrar notificación de error por DNI duplicado
           throw new Error(response.error);
         }
         if (response.data) {
           setClientes(prev => [...prev, response.data as Cliente]);
-          toast.success('Cliente creado con éxito', {
-            position: 'top-right',
-            icon: <FaCheckCircle className="text-[#2ECC40] mr-2" />
-          });
+          toast(
+            <span style={{ fontWeight: 'bold', color: '#011748' }}>
+              Cliente registrado con éxito
+            </span>,
+            {
+              icon: '✅',
+              style: { background: '#fff', color: '#011748', fontWeight: 'bold' },
+              position: 'top-center',
+              duration: 4000
+            }
+          );
+          handleCloseModal();
         }
       }
-      handleCloseModal();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Error al guardar cliente', {
-        position: 'top-right',
-        icon: <FaTimesCircle className="text-[#BA2E3B] mr-2" />
-      });
+      if (err instanceof Error && err.message === 'Failed to fetch') {
+        // No mostrar notificación para 'Failed to fetch'
+      } else {
+        toast.error(err instanceof Error ? err.message : 'Error al guardar cliente', {
+          icon: '❌',
+          style: { background: '#fff', color: '#BA2E3B', fontWeight: 'bold' },
+          position: 'top-center'
+        });
+      }
       console.error('Error al guardar cliente:', err);
     } finally {
       setIsSubmitting(false);
@@ -337,37 +340,79 @@ const Clientes: React.FC = () => {
   };
 
   const handleDeleteCliente = async (id_cliente: number) => {
-    if (!window.confirm('¿Está seguro de que desea eliminar este cliente?')) {
-      toast.info('Eliminación cancelada', {
-        position: 'top-right',
-        icon: <FaExclamationTriangle className="text-[#E39E36] mr-2" />
-      });
-      return;
-    }
-    setLoading(true);
-    try {
-      const response = await clienteApi.deleteCliente(id_cliente);
-      if (response.error) {
-      toast.error(`Error al eliminar cliente: ${response.error}`, {
-        position: 'top-right',
-        icon: <FaTimesCircle className="text-[#BA2E3B] mr-2" />
-      });
-        throw new Error(response.error);
+    toast(
+      (t) => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <span style={{ fontWeight: 'bold', color: '#BA2E3B' }}>
+            ⚠️ ¿Deseas eliminar este cliente?<br />
+            <span style={{ fontWeight: 'normal', color: '#011748' }}>
+              Esta acción no se puede deshacer y el registro será removido permanentemente.
+            </span>
+          </span>
+          <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+            <button
+              style={{ background: '#BA2E3B', color: '#fff', fontWeight: 'bold', borderRadius: '6px', padding: '6px 16px', border: 'none', cursor: 'pointer' }}
+              onClick={async () => {
+                toast.dismiss(t.id);
+                setLoading(true);
+                try {
+                  const response = await clienteApi.deleteCliente(id_cliente);
+                  if (response.error) {
+                    let mensaje = 'Error al eliminar cliente';
+                    if (!(response.error === 'Failed to fetch')) {
+                      mensaje = `Error al eliminar cliente: ${response.error}`;
+                    }
+                    toast.error(mensaje, {
+                      icon: '❌',
+                      style: { background: '#fff', color: '#BA2E3B', fontWeight: 'bold' },
+                      position: 'top-center'
+                    });
+                    // No lanzar el error para evitar doble notificación
+                    setLoading(false);
+                    return;
+                  }
+                  setClientes(prev => prev.filter(c => c.id_cliente !== id_cliente));
+                  toast.success('Cliente eliminado con éxito', {
+                    icon: '✅',
+                    style: { background: '#fff', color: '#011748', fontWeight: 'bold' },
+                    position: 'top-center'
+                  });
+                } catch (err) {
+                  let mensaje = 'Error al eliminar cliente';
+                  if (!(err instanceof Error && err.message === 'Failed to fetch')) {
+                    mensaje = err instanceof Error ? err.message : 'Error al eliminar cliente';
+                  }
+                  toast.error(mensaje, {
+                    icon: '❌',
+                    style: { background: '#fff', color: '#BA2E3B', fontWeight: 'bold' },
+                    position: 'top-center'
+                  });
+                  console.error('Error al eliminar cliente:', err);
+                  // No lanzar el error para evitar doble notificación
+                  setLoading(false);
+                }
+              }}
+            >Confirmar</button>
+            <button
+              style={{ background: '#fffbe6', color: '#BA2E3B', fontWeight: 'bold', borderRadius: '6px', padding: '6px 16px', border: 'none', cursor: 'pointer' }}
+              onClick={() => {
+                toast.dismiss(t.id);
+                toast('Eliminación cancelada por el usuario.', {
+                  icon: '⚠️',
+                  style: { background: '#fffbe6', color: '#BA2E3B', fontWeight: 'bold' },
+                  position: 'top-center'
+                });
+              }}
+            >Cancelar</button>
+          </div>
+        </div>
+      ),
+      {
+        duration: 10000,
+        position: 'top-center',
+        style: { background: '#fff', color: '#BA2E3B', fontWeight: 'bold', minWidth: '320px' }
       }
-      setClientes(prev => prev.filter(c => c.id_cliente !== id_cliente));
-      toast.success('Cliente eliminado con éxito', {
-        position: 'top-right',
-        icon: <FaCheckCircle className="text-[#2ECC40] mr-2" />
-      });
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Error al eliminar cliente', {
-        position: 'top-right',
-        icon: <FaTimesCircle className="text-[#BA2E3B] mr-2" />
-      });
-      console.error('Error al eliminar cliente:', err);
-    } finally {
-      setLoading(false);
-    }
+    );
   };
 
   const filteredClientes = searchTerm 
@@ -393,9 +438,7 @@ const Clientes: React.FC = () => {
         </button>
       </div>
 
-      {/* Las notificaciones ahora se muestran con Toastify */}
-
-      <ToastContainer />
+      {/* Las notificaciones ahora se muestran con react-hot-toast */}
       <div className="bg-white rounded-lg shadow-md overflow-hidden border-t-4 border-[#E39E36]">
         <div className="p-4 bg-[#F8F8F8]">
           <div className="flex">
@@ -406,12 +449,6 @@ const Clientes: React.FC = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <button 
-              className="ml-2 px-4 py-2 bg-[#011748] text-white rounded-lg hover:bg-[#011748]/90 transition-colors shadow-md flex items-center"
-              onClick={() => setSearchTerm('')}
-            >
-              <FaSearch className="mr-2" /> Buscar
-            </button>
           </div>
         </div>
 

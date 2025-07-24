@@ -175,7 +175,7 @@ const VentaDetalleModal: React.FC<VentaDetalleModalProps> = ({
                   <h2 className="text-2xl font-bold text-[#011748]">ESTACIÓN DE SERVICIOS</h2>
                   <h3 className="text-xl font-bold text-[#E39E36]">REPSOL</h3>
                   <p className="text-sm text-gray-600">R.U.C. 20548756921</p>
-                  <p className="text-sm text-gray-600">Av. La Marina 1234, San Miguel - Lima</p>
+                  <p className="text-sm text-gray-600">Av. Enrique Meiggs 12</p>
                   <p className="text-sm text-gray-600">Telf: (01) 555-1234</p>
                 </div>
               </div>

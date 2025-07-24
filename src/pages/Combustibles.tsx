@@ -46,37 +46,68 @@ const Combustibles: React.FC = () => {
   // Funciones para manejar combustibles
 
   const handleDeleteCombustible = async (id: number) => {
-    if (!window.confirm('¿Deseas eliminar este combustible? Esta acción no se puede deshacer y el registro será removido permanentemente.')) {
-      toast('Eliminación cancelada por el usuario.', {
-        icon: '⚠️',
-        style: { background: '#fffbe6', color: '#BA2E3B', fontWeight: 'bold' }
-      });
-      return;
-    }
-    try {
-      await combustibleApi.delete(id);
-      toast.success('Combustible eliminado con éxito', {
-        icon: '✅',
-        style: { background: '#fff', color: '#011748', fontWeight: 'bold' }
-      });
-      loadCombustibles();
-    } catch (error: unknown) {
-      console.error('Error al eliminar combustible:', error);
-      let mensaje = 'Error al eliminar el combustible';
-      if (
-        typeof error === 'object' &&
-        error !== null &&
-        'message' in error &&
-        typeof (error as { message?: string }).message === 'string' &&
-        (error as { message: string }).message.includes('Error:')
-      ) {
-        mensaje = 'No se pudo eliminar el combustible. Intenta nuevamente.';
+    toast(
+      (t) => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <span style={{ fontWeight: 'bold', color: '#BA2E3B' }}>
+            ⚠️ ¿Deseas eliminar este combustible?<br />
+            <span style={{ fontWeight: 'normal', color: '#011748' }}>
+              Esta acción no se puede deshacer y el registro será removido permanentemente.
+            </span>
+          </span>
+          <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+            <button
+              style={{ background: '#BA2E3B', color: '#fff', fontWeight: 'bold', borderRadius: '6px', padding: '6px 16px', border: 'none', cursor: 'pointer' }}
+              onClick={async () => {
+                toast.dismiss(t.id);
+                try {
+                  await combustibleApi.delete(id);
+                  toast.success('Combustible eliminado con éxito', {
+                    icon: '✅',
+                    style: { background: '#fff', color: '#011748', fontWeight: 'bold' },
+                    position: 'top-center'
+                  });
+                  loadCombustibles();
+                } catch (error) {
+                  console.error('Error al eliminar combustible:', error);
+                  let mensaje = 'Error al eliminar el combustible';
+                  if (
+                    typeof error === 'object' &&
+                    error !== null &&
+                    'message' in error &&
+                    typeof (error as { message?: string }).message === 'string' &&
+                    (error as { message: string }).message.includes('Error:')
+                  ) {
+                    mensaje = 'No se pudo eliminar el combustible. Intenta nuevamente.';
+                  }
+                  toast.error(mensaje, {
+                    icon: '❌',
+                    style: { background: '#fff', color: '#BA2E3B', fontWeight: 'bold' },
+                    position: 'top-center'
+                  });
+                }
+              }}
+            >Confirmar</button>
+            <button
+              style={{ background: '#fffbe6', color: '#BA2E3B', fontWeight: 'bold', borderRadius: '6px', padding: '6px 16px', border: 'none', cursor: 'pointer' }}
+              onClick={() => {
+                toast.dismiss(t.id);
+                toast('Eliminación cancelada por el usuario.', {
+                  icon: '⚠️',
+                  style: { background: '#fffbe6', color: '#BA2E3B', fontWeight: 'bold' },
+                  position: 'top-center'
+                });
+              }}
+            >Cancelar</button>
+          </div>
+        </div>
+      ),
+      {
+        duration: 10000,
+        position: 'top-center',
+        style: { background: '#fff', color: '#BA2E3B', fontWeight: 'bold', minWidth: '320px' }
       }
-      toast.error(mensaje, {
-        icon: '❌',
-        style: { background: '#fff', color: '#BA2E3B', fontWeight: 'bold' }
-      });
-    }
+    );
   };
   const handleEditPrecio = (id: number) => {
     setEditingId(id);

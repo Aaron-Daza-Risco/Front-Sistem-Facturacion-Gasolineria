@@ -1,4 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
+import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import { AuthContext } from './context/AuthContextType';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
@@ -235,10 +236,10 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 function App() {
   return (
     <AuthProvider>
+      <Toaster position="top-center" />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<LoginPage />} />
-          
           {/* Rutas protegidas */}
           <Route path="/dashboard" element={
             <ProtectedRoute>
@@ -250,7 +251,7 @@ function App() {
                 <Reportes />
               </ErrorBoundary>
             } />
-   
+     
             <Route path="ventas/nueva" element={<NuevaVenta />} />
             <Route path="ventas/lista" element={
               <ErrorBoundary>
